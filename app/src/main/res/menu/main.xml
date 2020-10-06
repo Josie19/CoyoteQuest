@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/reset"
+        android:orderInCategory="202"
+        android:title="@string/reset_button"
+        android:theme="@style/TextTheme"
+        app:showAsAction="always" />
+    <item android:id="@+id/grid"
+        android:orderInCategory="203"
+        android:icon="@drawable/grid"
+        android:title="@string/grid_icon"
+        app:showAsAction="ifRoom"/>
+</menu>

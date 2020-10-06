@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item android:title="Buildings">
+        <menu>
+            <item
+                android:id="@+id/bldg_1"
+                android:title="AD - Administration" />
+            <item
+                android:id="@+id/bldg_2"
+                android:title="AF - Auto Fleet Services" />
+            <item
+                android:id="@+id/bldg_3"
+                android:title="AH - Animal House / Vivarium" />
+            <!--<item
+                android:id="@+id/bldg_4"
+                android:title="AR - Academic Research" />-->
+            <item
+                android:id="@+id/bldg_5"
+                android:title="AS - Administrative Services" />
+            <!--<item
+                android:id="@+id/bldg_6"
+                android:title="AV - Arrowhead Village Housing" />-->
+            <item
+                android:id="@+id/bldg_7"
+                android:title="BI - Biological Sciences" />
+            <item
+                android:id="@+id/bldg_8"
+                android:title="BK - Coyote Bookstore" />
+            <item
+                android:id="@+id/bldg_9"
+                android:title="CC - Children's Center" />
+            <!--<item
+                android:id="@+id/bldg_10"
+                android:title="CCD - Coyote Commons" />-->
+            <item
+                android:id="@+id/bldg_11"
+                android:title="CE - College of Education" />
+            <item
+                android:id="@+id/bldg_12"
+                android:title="CH - Chaparrall Hall" />
+            <item
+                android:id="@+id/bldg_13"
+                android:title="CS - Chemical Sciences" />
+            <!--<item
+                android:id="@+id/bldg_14"
+                android:title="CV - Coyote Village" />
+            <item
+                android:id="@+id/bldg_15"
+                android:title="DD - Univ. Center for Development Disabilities" />-->
+            <item
+                android:id="@+id/bldg_16"
+                android:title="ES - Env. Health and Safety" />
+            <item
+                android:id="@+id/bldg_17"
+                android:title="FM - Facilities Planning and Mgmt" />
+            <item
+                android:id="@+id/bldg_18"
+                android:title="FO - Faculty Office Building" />
+            <item
+                android:id="@+id/bldg_19"
+                android:title="HA - HVAC Central Plant" />
+            <item
+                android:id="@+id/bldg_20"
+                android:title="HC - Student Health Center" />
+            <item
+                android:id="@+id/bldg_21"
+                android:title="HP - Health and PE Complex/Coussoulis Arena" />
+            <item
+                android:id="@+id/bldg_22"
+                android:title="IC - Information Center" />
+            <item
+                android:id="@+id/bldg_23"
+                android:title="JB - Jack H. Brown Hall" />
+            <!--<item
+                android:id="@+id/bldg_24"
+                android:title="MC - Meeting Center" />
+            <item
+                android:id="@+id/bldg_25"
+                android:title="OB - Murillo Family Observatory" />-->
+            <item
+                android:id="@+id/bldg_26"
+                android:title="PA - Performing Arts/Theatre/Recital Hall" />
+            <item
+                android:id="@+id/bldg_27"
+                android:title="PE - Physcial Education" />
+            <item
+                android:id="@+id/bldg_28"
+                android:title="PK1 - Parking Structure West" />
+            <item
+                android:id="@+id/bldg_29"
+                android:title="PK2 - Parking Structure East" />
+            <item
+                android:id="@+id/bldg_30"
+                android:title="PL - John M. Pfau Library" />
+            <item
+                android:id="@+id/bldg_31"
+                android:title="PS - Physical Sciences" />
+            <item
+                android:id="@+id/bldg_32"
+                android:title="PW - Plant/Central Warehouse" />
+            <item
+                android:id="@+id/bldg_33"
+                android:title="RF - Student Rec. and Wellness Ctr." />
+            <item
+                android:id="@+id/bldg_34"
+                android:title="SB - Social and Behavioral Sciences" />
+            <item
+                android:id="@+id/bldg_35"
+                android:title="SH - Sierra Hall" />
+            <item
+                android:id="@+id/bldg_36"
+                android:title="SU - Santos Manuel Student Union" />
+            <!--<item
+                android:id="@+id/bldg_37"
+                android:title="SV - Serrano Village" />
+            <item
+                android:id="@+id/bldg_38"
+                android:title="TC - Temp. Classrooms" />-->
+            <item
+                android:id="@+id/bldg_39"
+                android:title="TK - Temp. Kinesiology Annex" />
+            <item
+                android:id="@+id/bldg_40"
+                android:title="TO - Temp. Offices" />
+            <item
+                android:id="@+id/bldg_41"
+                android:title="UE - University Enterprises" />
+            <item
+                android:id="@+id/bldg_42"
+                android:title="UH - University Hall" />
+            <item
+                android:id="@+id/bldg_43"
+                android:title="UP - University Police" />
+            <!--<item
+                android:id="@+id/bldg_44"
+                android:title="UV - University Village" />-->
+            <item
+                android:id="@+id/bldg_45"
+                android:title="VA - Visual Arts Center/Robert and Frances Fullerton Museum" />
+            <item
+                android:id="@+id/bldg_46"
+                android:title="YC - Yasuda Ctr. for Ext. Learning" />
+
+        </menu>
+    </item>
+
+</menu>
