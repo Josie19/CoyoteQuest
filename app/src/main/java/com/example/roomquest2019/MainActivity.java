@@ -87,15 +87,18 @@ import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.SublayerList;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.ArcGISScene;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.Callout;
+import com.esri.arcgisruntime.mapping.view.GeoView;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.IdentifyGraphicsOverlayResult;
 import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.SceneView;
 import com.esri.arcgisruntime.mapping.view.NavigationChangedEvent;
 import com.esri.arcgisruntime.mapping.view.NavigationChangedListener;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
@@ -123,10 +126,12 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator
+public class MainActivity<scene> extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator
 {
     //=====Initial defined variables=====
+    private SceneView mSceneView;//this represents the view
     private MapView mMapView;
+    private ArcGISScene scene;//this represents the model
     private ArcGISMap map;
     private SearchView mAddressSearchView, mUtilitySearchView;
     private LocatorTask mLocatorTask, mLocatorTaskUtil;
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Route mRoute;
     private SimpleLineSymbol mRouteSymbol;
     private Geometry PrimaryBoundary,SecondaryBoundary,mCurrentExtentGeometry;
+    //private ArcGISImageServiceLayer sceneImageLayer;
     private ArcGISMapImageLayer mapImageLayer;
     private List<Stop> routeStops;
     private Graphic routeGraphic;
@@ -201,7 +207,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mLocatorTask = new LocatorTask(getResources().getString(R.string.GeocodeServer)); //Initiates the geocode service
         mLocatorTaskUtil = new LocatorTask(getResources().getString(R.string.util_search)); //initiate geocode for utilities search
         mapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.MapServer)); //Contains all of the map layer
-
+        /*
+        * scene = new ArcGISScene();// base layer
+        * 
+        * */
 
         mMapView = findViewById(R.id.mapView); // inflate MapView from layout
         StartButton = findViewById(R.id.start); //Initiates the start for routing
@@ -218,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             number_of_non_feature_layers = 1;
         });
         map.getOperationalLayers().add(mapImageLayer);
-        map.setMinScale(20000); //Sets the max zoom out scale
+        //scene.setMinScale(20000); //Sets the max zoom out scale
         map.setInitialViewpoint(InitialPoint); //Sets map view to initial point
         ReturnFloorView(1); // Initializes the initial map view by returning map layers relating to the first floor
         mMapView.setMap(map); //Sets the map once all necessary map layers are initiated
@@ -235,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LoadPointGroup();
         LoadAnnotationGroup();
         //--------------------------------------------------------
-        DetectMapView(); //Dectects map clicks
+        DetectMapView(); //Detects map clicks
 
 
 
@@ -345,14 +354,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         passwordInput.clearFocus();
         usernameInput.requestFocus();
         builder.setView(prompt);
-        builder.setTitle("Administration Login");
+        builder.setTitle("Utilities Login");
         logoutLayout= findViewById(R.id.logoutView);
         logoutButton = findViewById(R.id.logout);
 
         builder = new AlertDialog.Builder(MainActivity.this);
 
         builder.setView(prompt);
-        builder.setTitle("Administration Login");                                                   //QFOSTER
+        builder.setTitle("Utilities Login");                                                   //QFOSTER
         DialogPrompt();
 
         annotationButton.setVisibility(View.INVISIBLE);
@@ -1128,7 +1137,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    //=====Detects grid layout buttons when grid dialog is iniated=====
+    //=====Detects grid layout buttons when grid dialog is initiated=====
     //@Override
     public void onDialogMessage(String message)
     {
@@ -1200,7 +1209,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
                     //disable buttons
-                    BasementButton.setVisibility(View.GONE);   //diables Basement button from being clickable
+                    BasementButton.setVisibility(View.GONE);   //disables Basement button from being clickable
                     FloorButton1.setVisibility(View.GONE);     //disables floor buttons
                     FloorButton2.setVisibility(View.GONE);
                     FloorButton3.setVisibility(View.GONE);
@@ -1218,6 +1227,71 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
 
                    //mLocatorTask = new LocatorTask(getResources().getString(R.string.util_search)); //Initiates the geocode service
+
+                }
+                //JLM, added a supervisor tier that can accept or deny edit requests made by maintenance
+                else if((usernameText + " " + passwordText).equals(getResources().getString(R.string.SupervisorData))){
+                    usernameInput.getEditableText().clear();
+                    passwordInput.getEditableText().clear();
+                    Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_LONG).show();
+                    mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default    //DISABLE BUTTONS
+                    {
+                        for (int i =0;i<sublayers.size();i++)
+                        {
+                            sublayers.get(i).setVisible(false); //Sets all layers to false
+                        }
+                    });
+                    //disable buttons
+                    BasementButton.setVisibility(View.GONE);   //disables Basement button from being clickable
+                    FloorButton1.setVisibility(View.GONE);     //disables floor buttons
+                    FloorButton2.setVisibility(View.GONE);
+                    FloorButton3.setVisibility(View.GONE);
+                    FloorButton4.setVisibility(View.GONE);
+                    FloorButton5.setVisibility(View.GONE);      //end floor button disable
+                    mAddressSearchView.setVisibility(View.GONE);    //hides the search bar
+                    drawer.setDrawerLockMode(1);                    //makes drawer unclickable
+                    //end disable buttons
+
+                    logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
+                    loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
+                    ShowMaintenanceLayers(); //show feature layers since we're logged in
+                    //allowFacultyEditAccess();
+                    annotationButton.setVisibility(View.VISIBLE);
+
+                    mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
+
+
+                }//JLM, maintenance has access to water and can make requests to edit metadata
+                else if((usernameText + " " + passwordText).equals(getResources().getString(R.string.MaintenanceData))){
+                    usernameInput.getEditableText().clear();
+                    passwordInput.getEditableText().clear();
+                    Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_LONG).show();
+                    mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default    //DISABLE BUTTONS
+                    {
+                        for (int i =0;i<sublayers.size();i++)
+                        {
+                            sublayers.get(i).setVisible(false); //Sets all layers to false
+                        }
+                    });
+                    //disable buttons
+                    BasementButton.setVisibility(View.GONE);   //disables Basement button from being clickable
+                    FloorButton1.setVisibility(View.GONE);     //disables floor buttons
+                    FloorButton2.setVisibility(View.GONE);
+                    FloorButton3.setVisibility(View.GONE);
+                    FloorButton4.setVisibility(View.GONE);
+                    FloorButton5.setVisibility(View.GONE);      //end floor button disable
+                    mAddressSearchView.setVisibility(View.GONE);    //hides the search bar
+                    drawer.setDrawerLockMode(1);                    //makes drawer unclickable
+                    //end disable buttons
+
+                    logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
+                    loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
+                    ShowFeatureLayers(); //show feature layers since we're logged in
+                    //editAccess = false; until supervisor grants access
+                    annotationButton.setVisibility(View.VISIBLE);
+
+                    mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
+
 
                 }
                 else
@@ -1373,6 +1447,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             usernameInput.requestFocus();   //puts cursor on username textbox
             dialog.show();  //opens login screen
 
+        }//JLM, prompt user/password login box for supervisor
+        else if(address.equals("superlogin"))   //QFOSTER
+        {
+            passwordInput.clearFocus();
+            usernameInput.requestFocus();   //puts cursor on username textbox
+            dialog.show();  //opens login screen
+        }
+        else if(address.equals("mtxlogin"))   //QFOSTER
+        {
+            passwordInput.clearFocus();
+            usernameInput.requestFocus();   //puts cursor on username textbox
+            dialog.show();  //opens login screen
         }
         /*else if(address.equals("showall"))  //shortcut to login for debugging
         {
@@ -1798,17 +1884,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    //JLM,=====Sets visibility of maintenance feature layers ======
+    private void ShowMaintenanceLayers()
+    {
+        /*
+*private SceneView mSceneView;
+
+    private void setupScene() {
+        if (mSceneView != null) {
+            Basemap.Type basemapType = Basemap.Type.IMAGERY_WITH_LABELS;
+            ArcGISScene scene = new ArcGISScene(basemapType);
+            mSceneView.setScene(scene);
+            addFireHydrantLayer();
+            setElevationSource(scene);
+        }
+    }
+
+    private void addFireHydrantLayer() {
+
+        String url = "https://services9.arcgis.com/KlzFarGOomCHxtRQ/arcgis/rest/services/CSUSB_Utilities_Project_2020/FeatureServer/49";
+final ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(url);
+        FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+        mSceneView.getScene().getOperationalLayers().add(featureLayer);
+
+        Camera camera = new Camera(
+        34.1818096,
+        -117.3259524,
+        16000.0,
+        0.0,
+        50.0,
+        0);
+        mSceneView.setViewpointCamera(camera);
+        }
+
+private void setElevationSource(ArcGISScene scene) {
+        ArcGISTiledElevationSource elevationSource = new ArcGISTiledElevationSource(
+        "http://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer");
+        scene.getBaseSurface().getElevationSources().add(elevationSource);
+        }
+*/
+        //System.out.print(number_of_non_feature_layers);//debugging purposes
+        for(int i = number_of_non_feature_layers; i < 25 + number_of_non_feature_layers; i++){
+
+            if(i>=number_of_non_feature_layers){
+                map.getOperationalLayers().get(i).setVisible(true);
+            }
+        }
+
+    }
+
 
     //=====Detects map screen clicks=====
     @SuppressLint("ClickableViewAccessibility")
     private void DetectMapView()
     {
+        //mSceneView = mMapView, DefaultSceneViewOnTouchListener(context: this, mSceneView)
         mMapView.setOnTouchListener(new DefaultMapViewOnTouchListener(this, mMapView)
         {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent motionEvent)
             {
                 screenPoint.set(Math.round(motionEvent.getX()),Math.round(motionEvent.getY())); //Gets screen point
+                //mSceneView = mMapView
                 mapPoint = mMapView.screenToLocation(screenPoint); //Converst screen point to map view point
                 selectFeaturesAt(mapPoint); //Start feature selection function
                 return true;

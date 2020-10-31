@@ -32,6 +32,8 @@
     <string name="progress_message">Please wait&#8230;</string>
     <string name="todo">TODO</string>
     <string name="AdminData">Admin Admin </string>  <!--QFOSTER-->
+    <string name="SupervisorData">Super Super</string>  <!--QFOSTER,JLM 10/20-->
+    <string name="MaintenanceData">Mtx Mtx</string>         <!--QFOSTER,JLM 10/20-->
     <string name="UsernameBox">Username</string>
     <string name="PasscodeBox">Password</string>
     <string name="logoutButton">Logout</string>
