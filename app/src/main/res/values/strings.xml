@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RoomQuest</string>
+    <string name="app_name">CoyoteQuest</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">CSUSB</string>
@@ -39,6 +39,7 @@
     <string name="logoutButton">Logout</string>
 
     <string name="annotation">Annotations</string>
+    <string name="repairlog">Repair Log</string>
     <string name="annotation_group">https://services2.arcgis.com/x7KBHxmNSSlSDovo/arcgis/rest/services/CSUSB_Utilities_2019_Annotation_Group/FeatureServer/3</string>
     <string name="point_group">https://services2.arcgis.com/x7KBHxmNSSlSDovo/arcgis/rest/services/CSUSB_Utilities_2019_Point_Group/FeatureServer/</string>
     <string name="polyline_group">https://services2.arcgis.com/x7KBHxmNSSlSDovo/arcgis/rest/services/CSUSB_Utilities_2019_Polyline_Group/FeatureServer/</string>

@@ -126,7 +126,7 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity<scene> extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator
+public class MainActivity<scene> extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator, RepairGrid.Communicator
 {
     //=====Initial defined variables=====
     private SceneView mSceneView;//this represents the view
@@ -155,10 +155,11 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
     private Stop DevicePointLocation,DestinationStop;
     private ImageButton RecenterButton,NorthButton;
     private Button StartButton,StopButton;
+    private Button FireHydrant;//it opens a list view of maintenance history
     private ListenableFuture<RouteParameters> listenableFuture;
     private Viewpoint InitialPoint;
     private DrawerLayout drawer;
-    private FloatingActionButton BasementButton,FloorButton1,FloorButton2,FloorButton3,FloorButton4,FloorButton5;
+    private FloatingActionButton BasementButton,FloorButton1,FloorButton2,FloorButton3,FloorButton4,FloorButton5,FireHose;
     private int requestCode = 2, case_switch = 1;
     private final String TAG = MainActivity.class.getSimpleName();
     private final String COLUMN_NAME_ADDRESS = "address";
@@ -217,6 +218,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         StopButton = findViewById(R.id.stop); //Initiates the stop button for routing
         logoutButton = findViewById(R.id.logout);  //Initiates logout button for routing QFOSTER
         annotationButton = findViewById(R.id.annotations);
+
         sublayers = mapImageLayer.getSublayers(); //Defines the retrieved map layers from the server
         mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default
         {
@@ -458,6 +460,13 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
             GridDialog gridDialog = new GridDialog();
             gridDialog.show(manager, "Grid"); //Initiates the dialog for grid layers
         }
+        //Jose, added repair log detect
+        else if (id==R.id.repairlog) //Detects the grid button
+        {
+            android.support.v4.app.FragmentManager manager = getSupportFragmentManager();
+            RepairGrid repairDialog = new RepairGrid();
+            repairDialog.show(manager, "Repairlog"); //Initiates the dialog for repair layers
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -466,7 +475,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
     @Override
     public boolean onNavigationItemSelected(MenuItem item)
     {
-        if(loggedIn) {                  //Prevents drawer items from doing anything when logged in as an admin
+        if(loggedIn) {                  //Prevents drawer items from doing anything when logged in
             return true;
         }
         // Handle navigation view item clicks here.
@@ -739,6 +748,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
             }
         });
     }
+    //private void ReparLogListener(){}
 
     private void AnnotationListener()
     {
@@ -1286,7 +1296,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
 
                     logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
                     loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
-                    ShowFeatureLayers(); //show feature layers since we're logged in
+                    ShowMaintenanceLayers(); //show feature layers since we're logged in
                     //editAccess = false; until supervisor grants access
                     annotationButton.setVisibility(View.VISIBLE);
 
@@ -1924,9 +1934,9 @@ private void setElevationSource(ArcGISScene scene) {
         }
 */
         //System.out.print(number_of_non_feature_layers);//debugging purposes
-        for(int i = number_of_non_feature_layers; i < 25 + number_of_non_feature_layers; i++){
+        for(int i = number_of_non_feature_layers; i < 50 + number_of_non_feature_layers; i++){
 
-            if(i>=number_of_non_feature_layers){
+            if( i >=12 && i<=30){
                 map.getOperationalLayers().get(i).setVisible(true);
             }
         }

@@ -5,6 +5,7 @@
         android:id="@+id/reset"
         android:orderInCategory="202"
         android:title="@string/reset_button"
+        android:icon="@drawable/refresh"
         android:theme="@style/TextTheme"
         app:showAsAction="always" />
     <item android:id="@+id/grid"
@@ -12,4 +13,10 @@
         android:icon="@drawable/grid"
         android:title="@string/grid_icon"
         app:showAsAction="ifRoom"/>
+    <item android:id="@+id/repairlog"
+        android:orderInCategory="202"
+        android:icon="@drawable/repair"
+        android:title="Repairlog"
+        android:theme="@style/TextTheme"
+        app:showAsAction="always" />
 </menu>
