@@ -126,11 +126,12 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity<scene> extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator, RepairGrid.Communicator
+public class MainActivity<map> extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GridDialog.Communicator, RepairGrid.Communicator
 {
     //=====Initial defined variables=====
     private SceneView mSceneView;//this represents the view
     private MapView mMapView;
+    //private MapView flowMapView;
     private ArcGISScene scene;//this represents the model
     private ArcGISMap map;
     private SearchView mAddressSearchView, mUtilitySearchView;
@@ -139,6 +140,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
     private GeocodeParameters mAddressGeocodeParameters;
     private PictureMarkerSymbol mPinSourceSymbol;
     private SublayerList sublayers;
+    private SublayerList flowsublayers;
     private LocationDisplay mLocationDisplay;
     private Spinner mSpinner;
     private RouteTask mRouteTask;
@@ -148,6 +150,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
     private Geometry PrimaryBoundary,SecondaryBoundary,mCurrentExtentGeometry;
     //private ArcGISImageServiceLayer sceneImageLayer;
     private ArcGISMapImageLayer mapImageLayer;
+    private ArcGISMapImageLayer flowmapImageLayer;
     private List<Stop> routeStops;
     private Graphic routeGraphic;
     private List routes;
@@ -155,11 +158,12 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
     private Stop DevicePointLocation,DestinationStop;
     private ImageButton RecenterButton,NorthButton;
     private Button StartButton,StopButton;
-    private Button FireHydrant;//it opens a list view of maintenance history
+    private Button FireHydrant;//OPENS A FORM DEMANDING REPAIR SPECS
     private ListenableFuture<RouteParameters> listenableFuture;
     private Viewpoint InitialPoint;
     private DrawerLayout drawer;
-    private FloatingActionButton BasementButton,FloorButton1,FloorButton2,FloorButton3,FloorButton4,FloorButton5,FireHose;
+    private FloatingActionButton BasementButton,FloorButton1,FloorButton2,FloorButton3,FloorButton4,FloorButton5;
+    private FloatingActionButton lowFLow, mediumFlow, highFlow;//DISPLAY FIRE HYDRANTS ACCORDING TO FLOW RATES
     private int requestCode = 2, case_switch = 1;
     private final String TAG = MainActivity.class.getSimpleName();
     private final String COLUMN_NAME_ADDRESS = "address";
@@ -208,18 +212,21 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         mLocatorTask = new LocatorTask(getResources().getString(R.string.GeocodeServer)); //Initiates the geocode service
         mLocatorTaskUtil = new LocatorTask(getResources().getString(R.string.util_search)); //initiate geocode for utilities search
         mapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.MapServer)); //Contains all of the map layer
+        flowmapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.flow_group));
         /*
         * scene = new ArcGISScene();// base layer
         * 
         * */
 
         mMapView = findViewById(R.id.mapView); // inflate MapView from layout
+        //flowMapView = findViewById(R.id.View);
         StartButton = findViewById(R.id.start); //Initiates the start for routing
         StopButton = findViewById(R.id.stop); //Initiates the stop button for routing
         logoutButton = findViewById(R.id.logout);  //Initiates logout button for routing QFOSTER
         annotationButton = findViewById(R.id.annotations);
-
+        FireHydrant = findViewById(R.id.repairlog);//Initiates repairlog button for routing QFOSTER
         sublayers = mapImageLayer.getSublayers(); //Defines the retrieved map layers from the server
+        flowsublayers = flowmapImageLayer.getSublayers();//defines flow map layers from server
         mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default
         {
             for (int i =0;i<sublayers.size();i++)
@@ -229,7 +236,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
             number_of_non_feature_layers = 1;
         });
         map.getOperationalLayers().add(mapImageLayer);
-        //scene.setMinScale(20000); //Sets the max zoom out scale
+        map.setMinScale(20000); //Sets the max zoom out scale
         map.setInitialViewpoint(InitialPoint); //Sets map view to initial point
         ReturnFloorView(1); // Initializes the initial map view by returning map layers relating to the first floor
         mMapView.setMap(map); //Sets the map once all necessary map layers are initiated
@@ -245,6 +252,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         LoadPolylineGroup();
         LoadPointGroup();
         LoadAnnotationGroup();
+        LoadFlowGroup();
         //--------------------------------------------------------
         DetectMapView(); //Detects map clicks
 
@@ -262,7 +270,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         StopButton.setVisibility(View.INVISIBLE);
         logoutButton.setVisibility(View.INVISIBLE);
         annotationButton.setVisibility(View.INVISIBLE);
-
+        FireHydrant.setVisibility(View.INVISIBLE);//SHOULD ONLY BE VISIBLE AFTER MTX LOGIN!
         RoutingButtons(); //Used for detecting the start and stop buttons
 
         //Initiates pin drawable
@@ -295,6 +303,14 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         mUtilitySearchView.setQueryHint("Search utilities");
         setupAddressSearchViewUtil();
 
+        //Initiates fire buttons
+        lowFLow = findViewById(R.id.flow_item3);
+        mediumFlow = findViewById(R.id.flow_item2);
+        highFlow = findViewById(R.id.flow_item1);
+        //make them invisible in visitor/student view
+        lowFLow.setVisibility(View.GONE);
+        mediumFlow.setVisibility(View.GONE);
+        highFlow.setVisibility(View.GONE);
         //Initiates the floor buttons
         BasementButton = findViewById(R.id.menu_item6);
         FloorButton1 = findViewById(R.id.menu_item5);
@@ -303,6 +319,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         FloorButton4 = findViewById(R.id.menu_item2);
         FloorButton5 = findViewById(R.id.menu_item1);
         SetupFloorButtons(); //Used for detecting floor button clicks
+        SetupFlowRateButtons();//DETECT FLOW RATE BUTTONS
         SetupLogoutButton();    //Used for detecting logout button  //QFOSTER
 
 
@@ -366,6 +383,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         builder.setTitle("Utilities Login");                                                   //QFOSTER
         DialogPrompt();
 
+        //set flowrate buttons invisible/gone
         annotationButton.setVisibility(View.INVISIBLE);
         mUtilitySearchView.setVisibility(View.INVISIBLE);
         AnnotationListener();
@@ -464,7 +482,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
         else if (id==R.id.repairlog) //Detects the grid button
         {
             android.support.v4.app.FragmentManager manager = getSupportFragmentManager();
-            RepairGrid repairDialog = new RepairGrid();
+            RepairGrid repairDialog = new RepairGrid();//TRY GRIDDIALOG() INSTEAD
             repairDialog.show(manager, "Repairlog"); //Initiates the dialog for repair layers
         }
         return super.onOptionsItemSelected(item);
@@ -734,9 +752,16 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
 
                 mAddressSearchView.setVisibility(View.VISIBLE);      //shows the search bar
                 drawer.setDrawerLockMode(0);                         //makes drawer clickable
-                //end disable buttons
+                //end enable buttons
 
                 logoutButton.setVisibility(View.INVISIBLE);       //Hides logout button
+                FireHydrant.setVisibility(View.INVISIBLE);
+
+                //disable flow rate buttons
+                lowFLow.setVisibility(View.GONE);
+                mediumFlow.setVisibility(View.GONE);
+                highFlow.setVisibility(View.GONE);
+
                 loggedIn = false;                                //bool to show if logged in (Used to reneable navigation bar)
                 HideFeatureLayers(); //hide feature layers since we're logged out
                 annotationButton.setVisibility(View.INVISIBLE);
@@ -748,7 +773,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
             }
         });
     }
-    //private void ReparLogListener(){}
+    //private void RepairLogListener(){}
 
     private void AnnotationListener()
     {
@@ -869,6 +894,46 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                 mGraphicsOverlay.getGraphics().clear();
                 ReturnFloorView(5);
                 Toast.makeText(MainActivity.this,"5th Floor",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //create a fire hydrant flow rate setup
+    public void SetupFlowRateButtons(){
+        //=====Creates blue fire hydrant Button listener=====
+        lowFLow.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mMapView.getGraphicsOverlays().clear();
+                mGraphicsOverlay.getGraphics().clear();
+                ReturnFlowGroup(700);
+                Toast.makeText(MainActivity.this,"Low flow rate",Toast.LENGTH_SHORT).show();
+            }
+        });
+        //=====Creates green fire hydrant button listener========
+        mediumFlow.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mMapView.getGraphicsOverlays().clear();
+                mGraphicsOverlay.getGraphics().clear();
+                ReturnFlowGroup(1000);
+                Toast.makeText(MainActivity.this,"standard flow rate",Toast.LENGTH_SHORT).show();
+            }
+        });
+        //====Creates red fire hydrant button listener======
+        highFlow.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mMapView.getGraphicsOverlays().clear();
+                mGraphicsOverlay.getGraphics().clear();
+                ReturnFlowGroup(1500);
+                Toast.makeText(MainActivity.this,"High flow rate",Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -1229,6 +1294,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                     drawer.setDrawerLockMode(1);                    //makes drawer unclickable
                     //end disable buttons
 
+
                     logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
                     loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
                     ShowFeatureLayers(); //show feature layers since we're logged in
@@ -1251,6 +1317,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                             sublayers.get(i).setVisible(false); //Sets all layers to false
                         }
                     });
+                    //enable
                     //disable buttons
                     BasementButton.setVisibility(View.GONE);   //disables Basement button from being clickable
                     FloorButton1.setVisibility(View.GONE);     //disables floor buttons
@@ -1267,6 +1334,7 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                     ShowMaintenanceLayers(); //show feature layers since we're logged in
                     //allowFacultyEditAccess();
                     annotationButton.setVisibility(View.VISIBLE);
+                    //FireHydrant.setVisibility(View.VISIBLE);
 
                     mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
 
@@ -1276,11 +1344,10 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                     usernameInput.getEditableText().clear();
                     passwordInput.getEditableText().clear();
                     Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_LONG).show();
-                    mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default    //DISABLE BUTTONS
+                    mapImageLayer.addDoneLoadingListener(() ->
                     {
-                        for (int i =0;i<sublayers.size();i++)
-                        {
-                            sublayers.get(i).setVisible(false); //Sets all layers to false
+                        for(int i =0; i <sublayers.size(); i++){
+                            sublayers.get(i).setVisible(false);
                         }
                     });
                     //disable buttons
@@ -1291,15 +1358,21 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
                     FloorButton4.setVisibility(View.GONE);
                     FloorButton5.setVisibility(View.GONE);      //end floor button disable
                     mAddressSearchView.setVisibility(View.GONE);    //hides the search bar
-                    drawer.setDrawerLockMode(1);                    //makes drawer unclickable
+                    drawer.setDrawerLockMode(0);                    //makes drawer clickable
                     //end disable buttons
 
+                    //enable fire buttons
+                    lowFLow.setVisibility(View.VISIBLE);
+                    mediumFlow.setVisibility(View.VISIBLE);
+                    highFlow.setVisibility(View.VISIBLE);
+                    //end enable fire buttons
                     logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
                     loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
-                    ShowMaintenanceLayers(); //show feature layers since we're logged in
+                    ShowMaintenanceLayers();
+                    //LoadFlowGroup(); //show feature layers since we're logged in
                     //editAccess = false; until supervisor grants access
                     annotationButton.setVisibility(View.VISIBLE);
-
+                    FireHydrant.setVisibility(View.VISIBLE);
                     mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
 
 
@@ -1629,7 +1702,32 @@ public class MainActivity<scene> extends AppCompatActivity implements Navigation
             }
         }
     }
+    //====A void function to show specific map layers based on the flow rate number====
+    //flow layers are referenced from the server
+    public void ReturnFlowGroup(int flow_rate){
+        StartButton.setVisibility(View.INVISIBLE);
+        StopButton.setVisibility(View.INVISIBLE);
+        mMapView.getCallout().dismiss();
+        flowmapImageLayer.addDoneLoadingListener(() ->
+        {
+            for(int i =0; i <flowsublayers.size();i++){
+                flowsublayers.get(i).setVisible(false);
+            }
+            //enable all layers relating to certain structures to be visible
+            flowsublayers.get(0).setVisible(true);
 
+            if(flow_rate == 700){
+                flowsublayers.get(0).setVisible(true);
+            }
+            else if(flow_rate == 1000){
+                flowsublayers.get(1).setVisible(true);
+            }
+            else if(flow_rate == 1500){
+                flowsublayers.get(2).setVisible(true);
+            }
+        });
+    }
+//
     //=====A void function to show specific map layers based on the floor level number=====
     //Floor layers are referenced from the server
     public void ReturnFloorView(int floor_level)
@@ -1987,6 +2085,16 @@ private void setElevationSource(ArcGISScene scene) {
                 layerIndex.add(i);
             }
         }
+    }
+
+    //======Adds flow point layers============
+    private void LoadFlowGroup(){
+        int layer =  0;
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.flow_group)+layer);
+        FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+        featureLayer.setVisible(false);
+        map.getOperationalLayers().add(featureLayer);
+        layerIndex.add(layer);
     }
 
     //=====Adds the utility polyline group feature layers=====

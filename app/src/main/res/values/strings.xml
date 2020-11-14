@@ -25,6 +25,7 @@
     <string name="MapServer">http://coyotequest.cse.csusb.edu:6080/arcgis/rest/services/RoomQuest_V1/MapServer</string>
     <string name="GeocodeServer">http://coyotequest.cse.csusb.edu:6080/arcgis/rest/services/CampusLocator/GeocodeServer</string>
     <string name="routing_service">http://coyotequest.cse.csusb.edu:6080/arcgis/rest/services/Test_Route_Map/NAServer/Route</string>
+    <string name="flow_group">https://services9.arcgis.com/KlzFarGOomCHxtRQ/arcgis/rest/services/Maintenance/FeatureServer</string>
 
     <string name="FeatureLayerURL">https://services2.arcgis.com/x7KBHxmNSSlSDovo/ArcGIS/rest/services/CSUSB_Utilities_2019_Polyline/FeatureServer/1</string>
 

@@ -108,6 +108,32 @@
             app:fab_colorNormal="@color/colorPrimary"
             app:fab_colorPressed="@color/colorPrimaryDark"
             fab:fab_size="mini" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/flow_item1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/highflowrate"
+            app:fab_colorNormal="@color/transparentcolor"
+            app:fab_colorPressed="@color/transparentcolor"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/flow_item2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/mediumflowrate"
+            app:fab_colorNormal="@color/transparentcolor"
+            app:fab_colorPressed="@color/transparentcolor"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/flow_item3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/lowflowrate"
+            app:fab_colorNormal="@color/transparentcolor"
+            app:fab_colorPressed="@color/transparentcolor"
+            fab:fab_size="mini" />
 
     </com.github.clans.fab.FloatingActionMenu>
 
