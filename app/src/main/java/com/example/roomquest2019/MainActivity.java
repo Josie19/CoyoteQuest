@@ -212,7 +212,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         mLocatorTask = new LocatorTask(getResources().getString(R.string.GeocodeServer)); //Initiates the geocode service
         mLocatorTaskUtil = new LocatorTask(getResources().getString(R.string.util_search)); //initiate geocode for utilities search
         mapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.MapServer)); //Contains all of the map layer
-        flowmapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.flow_group));
+        flowmapImageLayer = new ArcGISMapImageLayer(getResources().getString(R.string.standard_group));
         /*
         * scene = new ArcGISScene();// base layer
         * 
@@ -225,6 +225,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         logoutButton = findViewById(R.id.logout);  //Initiates logout button for routing QFOSTER
         annotationButton = findViewById(R.id.annotations);
         FireHydrant = findViewById(R.id.repairlog);//Initiates repairlog button for routing QFOSTER
+        //lowFlow = findViewById(R.id.<lowflowbutton in logout.xml>);
         sublayers = mapImageLayer.getSublayers(); //Defines the retrieved map layers from the server
         flowsublayers = flowmapImageLayer.getSublayers();//defines flow map layers from server
         mapImageLayer.addDoneLoadingListener(() -> //Sets all map layers from the server to false by default
@@ -252,7 +253,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         LoadPolylineGroup();
         LoadPointGroup();
         LoadAnnotationGroup();
-        LoadFlowGroup();
+        //LoadFlowGroup();
         //--------------------------------------------------------
         DetectMapView(); //Detects map clicks
 
@@ -908,7 +909,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
             {
                 mMapView.getGraphicsOverlays().clear();
                 mGraphicsOverlay.getGraphics().clear();
-                ReturnFlowGroup(700);
+                LoadLowFlowGroup();
                 Toast.makeText(MainActivity.this,"Low flow rate",Toast.LENGTH_SHORT).show();
             }
         });
@@ -920,7 +921,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
             {
                 mMapView.getGraphicsOverlays().clear();
                 mGraphicsOverlay.getGraphics().clear();
-                ReturnFlowGroup(1000);
+                LoadStandardFlowGroup();
                 Toast.makeText(MainActivity.this,"standard flow rate",Toast.LENGTH_SHORT).show();
             }
         });
@@ -932,7 +933,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
             {
                 mMapView.getGraphicsOverlays().clear();
                 mGraphicsOverlay.getGraphics().clear();
-                ReturnFlowGroup(1500);
+                LoadHighFlowGroup();
                 Toast.makeText(MainActivity.this,"High flow rate",Toast.LENGTH_SHORT).show();
             }
         });
@@ -1368,7 +1369,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
                     //end enable fire buttons
                     logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
                     loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
-                    ShowMaintenanceLayers();
+                    //ShowMaintenanceLayers();
                     //LoadFlowGroup(); //show feature layers since we're logged in
                     //editAccess = false; until supervisor grants access
                     annotationButton.setVisibility(View.VISIBLE);
@@ -2034,7 +2035,7 @@ private void setElevationSource(ArcGISScene scene) {
         //System.out.print(number_of_non_feature_layers);//debugging purposes
         for(int i = number_of_non_feature_layers; i < 50 + number_of_non_feature_layers; i++){
 
-            if( i >=12 && i<=30){
+            if(i>=12 && i <=30){
                 map.getOperationalLayers().get(i).setVisible(true);
             }
         }
@@ -2076,7 +2077,7 @@ private void setElevationSource(ArcGISScene scene) {
     {
         for(int i = 1;i<32;i++)
         {
-            if(i!=3) //Add all feature layers except index 3
+            if(i!=3 && i!=12) //Add all feature layers except index 3
             {
                 ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.point_group)+i);
                 FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
@@ -2086,15 +2087,29 @@ private void setElevationSource(ArcGISScene scene) {
             }
         }
     }
+    private void LoadStandardFlowGroup(){
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.standard_group));
+        FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+        featureLayer.setVisible(true);
+        map.getOperationalLayers().add(featureLayer);
+        //layerIndex.add(13);
+    }
+
+    private void LoadHighFlowGroup(){
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.high_group));
+        FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
+        featureLayer.setVisible(true);
+        map.getOperationalLayers().add(featureLayer);
+    }
 
     //======Adds flow point layers============
-    private void LoadFlowGroup(){
-        int layer =  0;
-        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.flow_group)+layer);
+    private void LoadLowFlowGroup(){
+        int flowlayer =  12;//fire_hydrants!!!!!!!!!!!!!!!!!!!!!
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.point_group)+flowlayer);
         FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
-        featureLayer.setVisible(false);
+        featureLayer.setVisible(true);
         map.getOperationalLayers().add(featureLayer);
-        layerIndex.add(layer);
+        layerIndex.add(flowlayer);
     }
 
     //=====Adds the utility polyline group feature layers=====

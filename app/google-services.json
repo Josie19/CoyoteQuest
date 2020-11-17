@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "917886485999",
+    "firebase_url": "https://coyotequest-f2c23.firebaseio.com",
+    "project_id": "coyotequest-f2c23",
+    "storage_bucket": "coyotequest-f2c23.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917886485999:android:03a12f6c093dfee631a21a",
+        "android_client_info": {
+          "package_name": "com.csusb.coyotequest2020"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917886485999-o05huvij9ohlipfhqtefuq2tsssb420e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu50RwJoIgBEsUBHdbNfKr6DwHFGHTYuI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917886485999-o05huvij9ohlipfhqtefuq2tsssb420e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917886485999:android:b3fcbd41e79fd0f831a21a",
+        "android_client_info": {
+          "package_name": "com.example.roomquest2019"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917886485999-o05huvij9ohlipfhqtefuq2tsssb420e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu50RwJoIgBEsUBHdbNfKr6DwHFGHTYuI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917886485999-o05huvij9ohlipfhqtefuq2tsssb420e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
