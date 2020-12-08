@@ -158,7 +158,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
     private Stop DevicePointLocation,DestinationStop;
     private ImageButton RecenterButton,NorthButton;
     private Button StartButton,StopButton;
-    private Button FireHydrant;//OPENS A FORM DEMANDING REPAIR SPECS
+    private Button repairlog;//OPENS A FORM DEMANDING REPAIR SPECS
     private ListenableFuture<RouteParameters> listenableFuture;
     private Viewpoint InitialPoint;
     private DrawerLayout drawer;
@@ -224,7 +224,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         StopButton = findViewById(R.id.stop); //Initiates the stop button for routing
         logoutButton = findViewById(R.id.logout);  //Initiates logout button for routing QFOSTER
         annotationButton = findViewById(R.id.annotations);
-        FireHydrant = findViewById(R.id.repairlog);//Initiates repairlog button for routing QFOSTER
+        repairlog = findViewById(R.id.repairlog);//Initiates repairlog button for routing QFOSTER
         //lowFlow = findViewById(R.id.<lowflowbutton in logout.xml>);
         sublayers = mapImageLayer.getSublayers(); //Defines the retrieved map layers from the server
         flowsublayers = flowmapImageLayer.getSublayers();//defines flow map layers from server
@@ -271,7 +271,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         StopButton.setVisibility(View.INVISIBLE);
         logoutButton.setVisibility(View.INVISIBLE);
         annotationButton.setVisibility(View.INVISIBLE);
-        FireHydrant.setVisibility(View.INVISIBLE);//SHOULD ONLY BE VISIBLE AFTER MTX LOGIN!
+        repairlog.setVisibility(View.INVISIBLE);//SHOULD ONLY BE VISIBLE AFTER MTX LOGIN!
         RoutingButtons(); //Used for detecting the start and stop buttons
 
         //Initiates pin drawable
@@ -374,14 +374,14 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
         passwordInput.clearFocus();
         usernameInput.requestFocus();
         builder.setView(prompt);
-        builder.setTitle("Utilities Login");
+        builder.setTitle("Maintenance Login");
         logoutLayout= findViewById(R.id.logoutView);
         logoutButton = findViewById(R.id.logout);
 
         builder = new AlertDialog.Builder(MainActivity.this);
 
         builder.setView(prompt);
-        builder.setTitle("Utilities Login");                                                   //QFOSTER
+        builder.setTitle("Maintenance Login");                                                   //QFOSTER
         DialogPrompt();
 
         //set flowrate buttons invisible/gone
@@ -756,7 +756,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
                 //end enable buttons
 
                 logoutButton.setVisibility(View.INVISIBLE);       //Hides logout button
-                FireHydrant.setVisibility(View.INVISIBLE);
+                repairlog.setVisibility(View.INVISIBLE);
 
                 //disable flow rate buttons
                 lowFLow.setVisibility(View.GONE);
@@ -1335,7 +1335,7 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
                     ShowMaintenanceLayers(); //show feature layers since we're logged in
                     //allowFacultyEditAccess();
                     annotationButton.setVisibility(View.VISIBLE);
-                    //FireHydrant.setVisibility(View.VISIBLE);
+                    //repairlog.setVisibility(View.VISIBLE);
 
                     mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
 
@@ -1351,6 +1351,11 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
                             sublayers.get(i).setVisible(false);
                         }
                     });
+                    map.getOperationalLayers().add(flowmapImageLayer);
+                    map.setMinScale(20000); //Sets the max zoom out scale
+                    map.setInitialViewpoint(InitialPoint); //Sets map view to initial point
+                    //ReturnFloorView(1); // Initializes the initial map view by returning map layers relating to the first floor
+                    mMapView.setMap(map); //Sets the map once all necessary map layers are initiated
                     //disable buttons
                     BasementButton.setVisibility(View.GONE);   //disables Basement button from being clickable
                     FloorButton1.setVisibility(View.GONE);     //disables floor buttons
@@ -1369,11 +1374,11 @@ public class MainActivity<map> extends AppCompatActivity implements NavigationVi
                     //end enable fire buttons
                     logoutButton.setVisibility(View.VISIBLE);       //Shows logout button
                     loggedIn = true;                                //bool to show if logged in (Used to disable navigation bar)
-                    //ShowMaintenanceLayers();
+                    ShowMaintenanceLayers();//layers 12 to 30 displayed
                     //LoadFlowGroup(); //show feature layers since we're logged in
                     //editAccess = false; until supervisor grants access
                     annotationButton.setVisibility(View.VISIBLE);
-                    FireHydrant.setVisibility(View.VISIBLE);
+                    repairlog.setVisibility(View.VISIBLE);
                     mUtilitySearchView.setVisibility(View.VISIBLE); //show utility search bar
 
 
@@ -2104,12 +2109,12 @@ private void setElevationSource(ArcGISScene scene) {
 
     //======Adds flow point layers============
     private void LoadLowFlowGroup(){
-        int flowlayer =  12;//fire_hydrants!!!!!!!!!!!!!!!!!!!!!
-        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.point_group)+flowlayer);
+        //int flowlayer =  12;//fire_hydrants!!!!!!!!!!!!!!!!!!!!!
+        ServiceFeatureTable serviceFeatureTable = new ServiceFeatureTable(getResources().getString(R.string.low_group));
         FeatureLayer featureLayer = new FeatureLayer(serviceFeatureTable);
         featureLayer.setVisible(true);
         map.getOperationalLayers().add(featureLayer);
-        layerIndex.add(flowlayer);
+        //layerIndex.add(flowlayer);
     }
 
     //=====Adds the utility polyline group feature layers=====
